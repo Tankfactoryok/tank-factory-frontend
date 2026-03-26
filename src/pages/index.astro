@@ -1,10 +1,27 @@
 ---
-import Welcome from '../components/Welcome.astro';
-import Layout from '../layouts/Layout.astro';
+import Hero from '../components/Hero.astro';
 
-// Welcome to Astro! Wondering what to do next? Check out the Astro documentation at https://docs.astro.build
-// Don't want to use any of this? Delete everything in this file, the `assets`, `components`, and `layouts` directories, and start fresh.
+// 1. 定义你的后端地址（换成你刚才 1337 那个长链接）
+const STRAPI_URL = "https://turbo-potato-97pw559vrpw6fxrr6-1337.app.github.dev/";
+
+// 2. 抓取数据
+const response = await fetch(`${STRAPI_URL}/api/tank-pages?populate=*`);
+const { data } = await response.json();
+
+// 3. 拿到第一页的数据
+const pageData = data[0].attributes;
+const heroBlock = pageData.blocks.find(block => block.__component === "sections.hero");
 ---
+
+<main>
+  {heroBlock && (
+    <Hero 
+      title={heroBlock.title} 
+      subtitle={heroBlock.subtitle} 
+      cta_text={heroBlock.cta_text} 
+    />
+  )}
+</main>
 
 <Layout>
 	<Welcome />
