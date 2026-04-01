@@ -1,21 +1,44 @@
 ---
+// 接收 Strapi 数据
 const { title, items } = Astro.props;
 ---
-<section class="max-w-5xl mx-auto px-6 py-24 mb-20 bg-white">
-  <div class="flex items-end justify-between mb-16 border-b border-slate-100 pb-8">
-    <h2 class="text-4xl font-black text-slate-900 tracking-tighter mb-0">{title}</h2>
-    <span class="text-sm font-mono text-slate-400">SERIES-700 / 2026 EDITION</span>
-  </div>
-
-  {/* 💡 紧致的双列布局 */}
-  <div class="grid grid-cols-1 md:grid-cols-2 gap-x-20 gap-y-2">
-    {items && items.map((item: any) => (
-      <div class="flex items-center justify-between py-6 border-b border-slate-50 group hover:bg-slate-50 transition-colors px-4 rounded-xl">
-        <span class="text-slate-500 font-medium group-hover:text-slate-900 transition-colors">{item.label}</span>
-        <span class="text-blue-600 font-extrabold bg-blue-50/50 px-4 py-1.5 rounded-lg border border-blue-100/50">
-          {item.value}
-        </span>
+<section id="specifications" class="py-24 bg-white overflow-hidden">
+  <div class="max-w-5xl mx-auto px-6">
+    
+    {/* 标题栏与证书徽章对齐 */}
+    <div class="flex flex-col md:flex-row md:items-end justify-between mb-16 gap-6 border-b border-slate-100 pb-8">
+      <div class="space-y-2">
+        <span class="text-blue-600 font-bold tracking-widest text-sm uppercase">Technical Data Sheet</span>
+        <h2 class="text-4xl md:text-5xl font-black text-slate-900 tracking-tighter leading-none">
+          {title || "Technical Performance Specifications"}
+        </h2>
       </div>
-    ))}
+      <div class="px-5 py-2 bg-slate-50 border border-slate-200 rounded-full shadow-sm">
+        <span class="text-slate-500 font-mono text-xs font-bold tracking-widest">ISO-9001 CERTIFIED / 2026-V1</span>
+      </div>
+    </div>
+
+    {/* 参数列表：紧凑双列，Hover 时带有微小的高亮感 */}
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-x-20 gap-y-2">
+      {items && items.map((item: any) => (
+        <div class="flex items-center justify-between py-5 border-b border-slate-50 group hover:bg-slate-50 hover:px-4 hover:-mx-4 rounded-xl transition-all duration-300">
+          
+          <div class="flex items-center gap-3">
+            <div class="w-1.5 h-1.5 bg-blue-600 rounded-full opacity-0 group-hover:opacity-100 transition-opacity"></div>
+            <span class="text-slate-600 font-medium text-lg group-hover:text-slate-900 transition-colors">
+              {item.label}
+            </span>
+          </div>
+          
+          <div class="flex items-center">
+             <span class="text-blue-700 font-black text-xl tracking-tight bg-blue-50 px-4 py-1.5 rounded-lg border border-blue-100 group-hover:scale-105 transition-transform">
+               {item.value}
+             </span>
+          </div>
+          
+        </div>
+      ))}
+    </div>
+    
   </div>
 </section>

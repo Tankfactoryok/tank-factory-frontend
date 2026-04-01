@@ -1,9 +1,9 @@
 ---
-// 1. 导入全局样式 (Tailwind 4 魔法入口)
+// 1. 导入全局样式
 import '../styles/global.css';
 import Layout from '../layouts/Layout.astro';
 
-// 2. 积木组件全员登记
+// 2. 导入所有可能的“积木”组件（根据关键词动态按需调用）
 import Hero from '../components/sections/Hero.astro';
 import Features from '../components/sections/Features.astro';
 import Specifications from '../components/sections/Specifications.astro';
@@ -15,6 +15,7 @@ import Process from '../components/sections/Process.astro';
 import Testimonials from '../components/sections/Testimonials.astro';
 import TrustLogos from '../components/sections/TrustLogos.astro';
 
+// 3. 建立 Strapi 组件名与 Astro 组件的映射字典
 const componentMap: Record<string, any> = {
   'sections.hero': Hero,
   'sections.features': Features,
@@ -28,7 +29,7 @@ const componentMap: Record<string, any> = {
   'sections.trust-logos': TrustLogos,
 };
 
-// 🚨 核心修复：告诉 Astro 所有的动态路径
+// 4. 告诉 Astro 所有的动态关键词路径 (生成静态路由)
 export async function getStaticPaths() {
   const apiUrl = import.meta.env.PUBLIC_STRAPI_URL || 'https://turbo-potato-97pw559vrpw6fxrr6-1337.app.github.dev';
   try {
@@ -38,12 +39,12 @@ export async function getStaticPaths() {
       params: { slug: page.attributes.slug },
     })) || [];
   } catch (error) {
-    console.error("❌ 无法获取路径列表:", error);
+    console.error("❌ 无法获取关键词路径列表:", error);
     return [];
   }
 }
 
-// 3. 获取当前页面的数据
+// 5. 获取当前关键词页面的数据
 const { slug } = Astro.params;
 const apiUrl = import.meta.env.PUBLIC_STRAPI_URL || 'https://turbo-potato-97pw559vrpw6fxrr6-1337.app.github.dev';
 
@@ -54,7 +55,7 @@ const page = data?.[0]?.attributes;
 
 if (!page) return Astro.redirect('/404');
 
-// 4. 图片域名自动补全
+// 6. 核心修复：处理图片 URL，补全 Strapi 的相对路径，防止破图
 const processedBlocks = page.blocks?.map((block: any) => {
   if (block.image_url && block.image_url.startsWith('/uploads/')) block.image_url = apiUrl + block.image_url;
   if (block.items) {
@@ -67,11 +68,14 @@ const processedBlocks = page.blocks?.map((block: any) => {
 });
 ---
 
+{/* Layout 接收 Strapi 传来的 SEO 数据 */}
 <Layout title={page.seo_title} description={page.meta_description}>
   <main class="fsg-premium-container">
-    {/* 隐藏的 SEO 摘要 */}
+    
+    {/* 💡 GEO 隐藏文本块：专为搜索引擎蜘蛛准备，强化当前页面的关键词语义 */}
     {page.geo_snippet && <div class="hidden" aria-hidden="true">{page.geo_snippet}</div>}
 
+    {/* ⚡ 动态组件工厂：遍历处理好的 blocks，按需渲染积木 */}
     {processedBlocks?.map((block: any) => {
       const Component = componentMap[block.__component];
       return Component ? (
@@ -80,12 +84,13 @@ const processedBlocks = page.blocks?.map((block: any) => {
         </section>
       ) : null;
     })}
+    
   </main>
 </Layout>
 
 <style is:global>
   /* ==========================================
-     🛡️ 欧美工业大厂级视觉装甲 (Emergency Layout Fix)
+     🛡️ 欧美工业大厂级视觉装甲 (全局排版控制)
      ========================================== */
 
   /* 1. 物理镇压巨型黑勾 (防乱码) */
@@ -97,7 +102,7 @@ const processedBlocks = page.blocks?.map((block: any) => {
     flex-shrink: 0;
   }
 
-  /* 2. Hero 沉浸感重塑 (强制背景图全屏) */
+  /* 2. Hero 沉浸感重塑 (强制背景图全屏暗黑化) */
   [data-comp="sections.hero"] {
     position: relative !important;
     background: #0f172a !important;
@@ -127,7 +132,7 @@ const processedBlocks = page.blocks?.map((block: any) => {
     letter-spacing: -0.04em !important;
   }
 
-  /* 3. 网格排版强制校准 (防止挤成一团) */
+  /* 3. 网格排版强制校准 (防止特性、案例卡片挤成一团) */
   [data-comp="sections.features"] > div,
   [data-comp="sections.case-studies"] > div {
     display: grid !important;
