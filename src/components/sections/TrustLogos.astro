@@ -1,0 +1,19 @@
+---
+const { title, logos = [] } = Astro.props;
+---
+<section class="py-12 bg-zinc-100 border-y border-zinc-200">
+  <div class="max-w-7xl mx-auto px-6">
+    <p class="text-center text-sm font-bold text-zinc-400 uppercase tracking-widest mb-8">{title}</p>
+    <div class="flex flex-wrap justify-center items-center gap-10 md:gap-20 opacity-60 grayscale hover:grayscale-0 transition-all duration-500">
+      {logos.map((logo: any) => (
+        <div class="flex items-center justify-center">
+          {logo.image_url ? (
+            <img src={logo.image_url} alt={logo.name} class="h-8 md:h-12 object-contain" />
+          ) : (
+            <span class="text-xl md:text-3xl font-black text-zinc-400 uppercase tracking-tighter">{logo.name}</span>
+          )}
+        </div>
+      ))}
+    </div>
+  </div>
+</section>

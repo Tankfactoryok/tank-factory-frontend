@@ -1,0 +1,14 @@
+---
+const { title, subtitle, button_text } = Astro.props;
+---
+<section class="py-24 bg-blue-900 relative overflow-hidden">
+  <div class="absolute inset-0 opacity-10" style="background-image: repeating-linear-gradient(45deg, #000 25%, transparent 25%, transparent 75%, #000 75%, #000), repeating-linear-gradient(45deg, #000 25%, #000 25%, transparent 25%, transparent 75%, #000 75%, #000); background-position: 0 0, 10px 10px; background-size: 20px 20px;"></div>
+  
+  <div class="max-w-4xl mx-auto px-6 relative z-10 text-center flex flex-col items-center">
+    <h2 class="text-3xl md:text-5xl font-extrabold text-white mb-6 tracking-tight">{title}</h2>
+    <p class="text-xl text-blue-200 mb-10 max-w-2xl">{subtitle}</p>
+    <button class="bg-white text-blue-900 px-12 py-5 rounded-lg text-xl font-black uppercase tracking-wider hover:bg-zinc-100 transition-all shadow-2xl hover:scale-105 transform duration-200">
+      {button_text || 'Get a Quote Now'}
+    </button>
+  </div>
+</section>

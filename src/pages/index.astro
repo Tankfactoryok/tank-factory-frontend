@@ -1,28 +1,13 @@
 ---
-import Hero from '../components/Hero.astro';
-
-// 1. 定义你的后端地址（换成你刚才 1337 那个长链接）
-const STRAPI_URL = "https://turbo-potato-97pw559vrpw6fxrr6-1337.app.github.dev/";
-
-// 2. 抓取数据
-const response = await fetch(`${STRAPI_URL}/api/tank-pages?populate=*`);
-const { data } = await response.json();
-
-// 3. 拿到第一页的数据
-const pageData = data[0].attributes;
-const heroBlock = pageData.blocks.find(block => block.__component === "sections.hero");
 ---
-
-<main>
-  {heroBlock && (
-    <Hero 
-      title={heroBlock.title} 
-      subtitle={heroBlock.subtitle} 
-      cta_text={heroBlock.cta_text} 
-    />
-  )}
-</main>
-
-<Layout>
-	<Welcome />
-</Layout>
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <title>坦克工厂</title>
+</head>
+<body>
+  <h1>坦克工厂主基地运转正常！</h1>
+  <p>请在地址栏输入具体的坦克页链接（Slug）进行检阅。</p>
+</body>
+</html>

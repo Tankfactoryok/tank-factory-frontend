@@ -1,0 +1,170 @@
+---
+export const prerender = false; 
+import Layout from '../../layouts/Layout.astro';
+import { marked } from 'marked';
+
+const { slug } = Astro.params;
+const STRAPI_URL = "https://turbo-potato-97pw559vrpw6fxrr6-1337.app.github.dev"; 
+
+const response = await fetch(`${STRAPI_URL}/api/blog-posts?filters[slug][$eq]=${slug}&populate=*`);
+const json = await response.json();
+const post = json.data?.[0]?.attributes;
+
+if (!post) return Astro.redirect('/404');
+
+let rawContent = post.content || "";
+
+/**
+ * 💡 1. 物理修复：强制补全本地图片路径 (彻底解决图片不显示)
+ */
+if (rawContent) {
+  rawContent = rawContent.replaceAll('(/uploads/', `(${STRAPI_URL}/uploads/`);
+  rawContent = rawContent.replaceAll('src="/uploads/', `src="${STRAPI_URL}/uploads/`);
+}
+
+/**
+ * 💡 2. 暴力清除 AI 违规生成的双重目录 (兜底防御)
+ */
+rawContent = rawContent.replace(/##\s*Table of Contents[\s\S]*?(?=##\s+)/i, '');
+rawContent = rawContent.replace(/#\s*Table of Contents[\s\S]*?(?=##\s+)/i, '');
+
+/**
+ * 💡 3. 物理提取唯一正确目录 (ToC)
+ */
+const h2Regex = /^##\s+(.*)$/gm;
+const toc = [];
+let match;
+while ((match = h2Regex.exec(rawContent)) !== null) {
+  const fullTitle = match[1].trim();
+  // 彻底清洗标题中的 HTML 标签 (如 sup) 以防脏数据进入目录
+  const cleanTitle = fullTitle.replace(/<[^>]*>?/gm, '').trim();
+  if (cleanTitle.toLowerCase() !== 'table of contents' && cleanTitle.toLowerCase() !== 'footnotes') {
+    const id = cleanTitle.toLowerCase().replace(/[^\w\s-]/g, '').replace(/\s+/g, '-');
+    toc.push({ title: cleanTitle, id });
+  }
+}
+
+/**
+ * 💡 4. 正文 ID 注入 与 脚注高精雷达扫描
+ */
+let processedContent = rawContent;
+toc.forEach(item => {
+  // 精准匹配该行 H2 并注入 ID，防止破坏内部结构
+  const lineRegex = new RegExp(`^##\\s+.*${item.title.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}.*$`, 'gm');
+  processedContent = processedContent.replace(lineRegex, (matchStr) => {
+     return `<h2 id="${item.id}">${matchStr.replace(/^##\s+/, '')}</h2>`;
+  });
+});
+
+// 🔥 核心回跳修复：精准捕获 [Text](URL) <sup id="ref-x">[x](#footnote-x)</sup>
+// 并将其转换为可点文字+可点符号的复合模块，且保证 id="ref-x" 在 span 上生效
+processedContent = processedContent.replace(
+  /\[([^\]]+)\]\(([^)]+)\)\s*<sup[^>]*>\s*\[(\d+)\]\(#footnote-\d+\)\s*<\/sup>/gi,
+  '<span class="citation-block" id="ref-$3"><a href="$2" class="keyword-link" target="_blank" rel="noopener noreferrer">$1</a><a href="#footnote-$3" class="superscript-nav"><sup>[$3]</sup></a></span>'
+);
+
+// 物理切割引言与正文
+const firstH2Index = processedContent.indexOf('<h2 id="');
+let introHtml = "";
+let mainBodyHtml = "";
+
+if (firstH2Index !== -1) {
+  introHtml = marked.parse(processedContent.substring(0, firstH2Index));
+  mainBodyHtml = marked.parse(processedContent.substring(firstH2Index));
+} else {
+  introHtml = marked.parse(processedContent);
+}
+
+const schemaData = JSON.stringify(post.schema_json);
+---
+
+<Layout title={post.seo_title} description={post.meta_description}>
+  <head slot="head">
+    <link rel="canonical" href={post.canonical_url} />
+    <div class="geo-data" style="display:none;" aria-hidden="true">
+      {post.geo_snippet}
+    </div>
+    {post.schema_json && <script type="application/ld+json" set:html={schemaData} />}
+  </head>
+
+  <main class="blog-container">
+    <article class="industrial-article">
+      <header class="article-header">
+        <h1 class="article-title">{post.title}</h1>
+        {post.image_url && (
+          <div class="hero-wrapper">
+            <img src={post.image_url.startsWith('/') ? STRAPI_URL + post.image_url : post.image_url} alt={post.title} class="hero-image" loading="eager" />
+          </div>
+        )}
+      </header>
+
+      <section class="article-intro" set:html={introHtml} />
+
+      {toc.length > 0 && (
+        <nav class="toc-wrapper">
+          <div class="toc-tag">TECHNICAL GUIDE</div>
+          <h4 class="toc-heading">Table of Contents</h4>
+          <ul class="toc-list">
+            {toc.map(item => (
+              <li><a href={`#${item.id}`}>{item.title}</a></li>
+            ))}
+          </ul>
+        </nav>
+      )}
+
+      <div class="article-body" set:html={mainBodyHtml} />
+
+      <div class="inquiry-cta">
+        <div class="cta-inner">
+          <div class="cta-header-group">
+            <div class="cta-tag">B2B Expert Support</div>
+            <h3>Looking for Technical Guidance?</h3>
+          </div>
+          <p>Get in touch with Fortis Systems Group for high-performance hydraulic configurations and volume-based industrial pricing.</p>
+          <a href="/contact" class="cta-button">Request a Technical Quote</a>
+        </div>
+      </div>
+    </article>
+  </main>
+</Layout>
+
+<style is:global>
+  :root { --primary-blue: #2563eb; --industrial-dark: #111827; --bg-soft: #f8fafc; --border-gray: #cbd5e1; }
+  .blog-container { max-width: 850px; margin: 4rem auto; padding: 0 1.5rem; line-height: 1.8; color: #1a202c; font-family: 'Inter', sans-serif; }
+  .article-title { font-size: 3.5rem; font-weight: 900; color: var(--industrial-dark); margin-bottom: 2.5rem; letter-spacing: -0.03em; }
+  
+  /* 💡 图片修复：等宽 + 阴影 */
+  .hero-wrapper, .article-body img, .article-intro img { width: 100% !important; max-width: 100% !important; border-radius: 16px; margin: 4rem 0; box-shadow: 0 25px 50px -12px rgba(0,0,0,0.15); display: block; height: auto; }
+
+  /* 💡 表格修复：最高权重强制穿透，显示边线 */
+  .article-body table { width: 100% !important; border-collapse: collapse !important; margin: 3.5rem 0 !important; font-size: 1rem !important; border: 1px solid var(--border-gray) !important; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05) !important; }
+  .article-body th, .article-body td { border: 1px solid var(--border-gray) !important; padding: 16px !important; text-align: left !important; }
+  .article-body th { background-color: var(--bg-soft) !important; color: #0f172a !important; font-weight: 800 !important; }
+  .article-body tr:nth-child(even) { background-color: #fbfcfd !important; } 
+
+  /* 💡 目录样式 */
+  .toc-wrapper { background: var(--bg-soft); border: 1px solid var(--border-gray); border-radius: 16px; padding: 2.5rem; margin: 5rem 0; position: relative; }
+  .toc-tag { position: absolute; top: -12px; left: 24px; background: var(--primary-blue); color: white; font-size: 0.75rem; padding: 2px 10px; border-radius: 20px; font-weight: 800; }
+  .toc-heading { font-size: 1.2rem; font-weight: 800; color: var(--industrial-dark); margin-top: 0; margin-bottom: 1.5rem; }
+  .toc-list { list-style: none; padding: 0; margin: 0; display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 0.75rem 2rem; }
+  .toc-list a { color: var(--primary-blue); text-decoration: none; font-weight: 500; font-size: 1.1rem; }
+
+  /* 🔗 复合式脚注热区：关键词+数字全跳转 */
+  .citation-block { display: inline; border-radius: 4px; padding: 2px 0; transition: background 0.3s ease; }
+  .citation-block:hover { background: rgba(37, 99, 235, 0.08); }
+  .keyword-link { color: var(--primary-blue); text-decoration: underline; text-underline-offset: 6px; font-weight: 600; }
+  .superscript-nav { text-decoration: none !important; font-weight: 800; padding-left: 2px; color: var(--primary-blue); }
+
+  /* 锚点偏移控制：解决跳转时被屏幕顶部遮挡 */
+  [id^="footnote-"], [id^="ref-"], h2[id] { scroll-margin-top: 150px; display: inline-block; }
+
+  /* 底部脚注列表区 */
+  span[id^="footnote-"] { display: block; background: var(--bg-soft); padding: 1.5rem; border-left: 6px solid var(--primary-blue); margin-top: 1.5rem; border-radius: 0 12px 12px 0; }
+  span[id^="footnote-"] a { color: var(--primary-blue); text-decoration: none; font-weight: 800; margin-left: 12px; font-size: 1.1rem; }
+
+  .article-body h2 { font-size: 2.2rem; font-weight: 800; margin-top: 6rem; border-bottom: 2px solid #eee; padding-bottom: 1rem; }
+
+  .inquiry-cta { margin-top: 10rem; background: var(--industrial-dark); color: white; padding: 6rem 2rem; border-radius: 40px; text-align: center; }
+  .cta-button { display: inline-block; margin-top: 3rem; background: var(--primary-blue); color: white; padding: 1.4rem 4rem; border-radius: 12px; text-decoration: none; font-weight: 800; font-size: 1.2rem; box-shadow: 0 10px 25px -5px rgba(37, 99, 235, 0.4); transition: transform 0.3s; }
+  .cta-button:hover { transform: translateY(-5px); }
+</style>

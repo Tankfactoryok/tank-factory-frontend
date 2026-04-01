@@ -1,0 +1,149 @@
+---
+// 1. 导入全局样式 (Tailwind 4 魔法入口)
+import '../styles/global.css';
+import Layout from '../layouts/Layout.astro';
+
+// 2. 积木组件全员登记
+import Hero from '../components/sections/Hero.astro';
+import Features from '../components/sections/Features.astro';
+import Specifications from '../components/sections/Specifications.astro';
+import Comparison from '../components/sections/Comparison.astro';
+import FAQ from '../components/sections/FAQ.astro';
+import CaseStudies from '../components/sections/CaseStudies.astro';
+import CTABottom from '../components/sections/CTABottom.astro';
+import Process from '../components/sections/Process.astro';
+import Testimonials from '../components/sections/Testimonials.astro';
+import TrustLogos from '../components/sections/TrustLogos.astro';
+
+const componentMap: Record<string, any> = {
+  'sections.hero': Hero,
+  'sections.features': Features,
+  'sections.specifications': Specifications,
+  'sections.comparison': Comparison,
+  'sections.faq': FAQ,
+  'sections.case-studies': CaseStudies,
+  'sections.cta-bottom': CTABottom,
+  'sections.process': Process,
+  'sections.testimonials': Testimonials,
+  'sections.trust-logos': TrustLogos,
+};
+
+// 🚨 核心修复：告诉 Astro 所有的动态路径
+export async function getStaticPaths() {
+  const apiUrl = import.meta.env.PUBLIC_STRAPI_URL || 'https://turbo-potato-97pw559vrpw6fxrr6-1337.app.github.dev';
+  try {
+    const res = await fetch(`${apiUrl}/api/tank-pages`);
+    const json = await res.json();
+    return json.data?.map((page: any) => ({
+      params: { slug: page.attributes.slug },
+    })) || [];
+  } catch (error) {
+    console.error("❌ 无法获取路径列表:", error);
+    return [];
+  }
+}
+
+// 3. 获取当前页面的数据
+const { slug } = Astro.params;
+const apiUrl = import.meta.env.PUBLIC_STRAPI_URL || 'https://turbo-potato-97pw559vrpw6fxrr6-1337.app.github.dev';
+
+const queryUrl = `${apiUrl}/api/tank-pages?filters[slug][$eq]=${slug}&populate[blocks][populate]=*`;
+const response = await fetch(queryUrl);
+const { data } = await response.json();
+const page = data?.[0]?.attributes;
+
+if (!page) return Astro.redirect('/404');
+
+// 4. 图片域名自动补全
+const processedBlocks = page.blocks?.map((block: any) => {
+  if (block.image_url && block.image_url.startsWith('/uploads/')) block.image_url = apiUrl + block.image_url;
+  if (block.items) {
+    block.items = block.items.map((item: any) => {
+      if (item.image_url && item.image_url.startsWith('/uploads/')) item.image_url = apiUrl + item.image_url;
+      return item;
+    });
+  }
+  return block;
+});
+---
+
+<Layout title={page.seo_title} description={page.meta_description}>
+  <main class="fsg-premium-container">
+    {/* 隐藏的 SEO 摘要 */}
+    {page.geo_snippet && <div class="hidden" aria-hidden="true">{page.geo_snippet}</div>}
+
+    {processedBlocks?.map((block: any) => {
+      const Component = componentMap[block.__component];
+      return Component ? (
+        <section class="industrial-block" data-comp={block.__component}>
+          <Component {...block} />
+        </section>
+      ) : null;
+    })}
+  </main>
+</Layout>
+
+<style is:global>
+  /* ==========================================
+     🛡️ 欧美工业大厂级视觉装甲 (Emergency Layout Fix)
+     ========================================== */
+
+  /* 1. 物理镇压巨型黑勾 (防乱码) */
+  svg, [class*="lucide"], [class*="icon"] {
+    width: 28px !important;
+    height: 28px !important;
+    max-width: 28px !important;
+    max-height: 28px !important;
+    flex-shrink: 0;
+  }
+
+  /* 2. Hero 沉浸感重塑 (强制背景图全屏) */
+  [data-comp="sections.hero"] {
+    position: relative !important;
+    background: #0f172a !important;
+    min-height: 80vh !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    overflow: hidden !important;
+    text-align: center !important;
+    color: white !important;
+  }
+  [data-comp="sections.hero"] img {
+    position: absolute !important;
+    inset: 0 !important;
+    width: 100% !important;
+    height: 100% !important;
+    object-fit: cover !important;
+    opacity: 0.4 !important;
+    z-index: 1 !important;
+  }
+  [data-comp="sections.hero"] h1 {
+    font-size: 5rem !important;
+    font-weight: 900 !important;
+    z-index: 10 !important;
+    position: relative !important;
+    line-height: 1.1 !important;
+    letter-spacing: -0.04em !important;
+  }
+
+  /* 3. 网格排版强制校准 (防止挤成一团) */
+  [data-comp="sections.features"] > div,
+  [data-comp="sections.case-studies"] > div {
+    display: grid !important;
+    grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)) !important;
+    gap: 3rem !important;
+    max-width: 1280px !important;
+    margin: 4rem auto !important;
+    padding: 0 2rem !important;
+  }
+
+  /* 4. 其它工业细节 */
+  .industrial-block {
+    padding: 4rem 0 !important;
+  }
+  img:not([data-comp="sections.hero"] img) {
+    border-radius: 2rem !important;
+    box-shadow: 0 20px 25px -5px rgba(0,0,0,0.1) !important;
+  }
+</style>
