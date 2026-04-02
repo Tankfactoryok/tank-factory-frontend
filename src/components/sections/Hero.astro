@@ -1,45 +1,22 @@
 ---
-// 接收从 Strapi 传来的动态数据
 const { title, subtitle, cta_text, image_url } = Astro.props;
 ---
-
-{/* 1. 外层容器：强制全宽 (w-full)，无边界 */}
 <section class="relative w-full min-h-[85vh] flex items-center justify-center overflow-hidden bg-slate-950 text-white">
-  
-  {/* 2. 背景图片：绝对定位，铺满整个外层 */}
   {image_url && (
     <div class="absolute inset-0 w-full h-full">
-      <img
-        src={image_url}
-        alt={title || "Industrial Hero Image"}
-        class="w-full h-full object-cover opacity-40 mix-blend-luminosity"
-      />
-      {/* 渐变遮罩：让底部自然过渡到下一个版块 */}
+      <img src={image_url} alt={title} class="w-full h-full object-cover opacity-40 mix-blend-luminosity" />
       <div class="absolute inset-0 bg-gradient-to-t from-slate-900 via-transparent to-transparent"></div>
     </div>
   )}
-
-  {/* 3. 内容容器：限制最大宽度，居中对齐，确保在超大屏幕上文字不会太散 */}
   <div class="relative z-10 w-full max-w-5xl mx-auto px-6 text-center flex flex-col items-center mt-16">
-    
-    {/* 标题 */}
     <h1 class="text-5xl md:text-7xl font-black tracking-tighter mb-6 leading-[1.1] drop-shadow-2xl text-white">
       {title}
     </h1>
-    
-    {/* 副标题 */}
-    {subtitle && (
-      <p class="text-lg md:text-2xl text-slate-300 max-w-3xl mx-auto mb-10 leading-relaxed font-medium">
-        {subtitle}
-      </p>
-    )}
-    
-    {/* 按钮 */}
+    {subtitle && <p class="text-lg md:text-2xl text-slate-300 max-w-3xl mx-auto mb-10 leading-relaxed font-medium">{subtitle}</p>}
     {cta_text && (
-      <a href="#specifications" class="px-8 py-4 bg-blue-600 hover:bg-blue-500 text-white font-bold rounded-xl transition-all shadow-xl shadow-blue-600/30 hover:-translate-y-1 hover:shadow-blue-500/40 text-lg">
+      <a href="#specifications" class="px-8 py-4 bg-blue-600 hover:bg-blue-500 text-white font-bold rounded-xl transition-all shadow-xl shadow-blue-600/30 hover:-translate-y-1 text-lg">
         {cta_text}
       </a>
     )}
-    
   </div>
 </section>

@@ -1,49 +1,29 @@
 ---
-const { title, subtitle, items } = Astro.props;
+const { title, items } = Astro.props;
 ---
 <section class="py-24 bg-slate-50">
   <div class="max-w-5xl mx-auto px-6">
-    
     <div class="text-center mb-16">
       <span class="text-blue-600 font-bold tracking-widest text-sm uppercase">Performance Benchmarks</span>
       <h2 class="text-4xl md:text-5xl font-black text-slate-900 tracking-tighter mt-4">
         {title || "Why Choose Our Motors"}
       </h2>
-      {subtitle && <p class="text-slate-500 mt-6 text-lg">{subtitle}</p>}
     </div>
-
-    {/* 对比表格面板 */}
     <div class="bg-white rounded-3xl shadow-xl shadow-slate-200/50 border border-slate-200 overflow-hidden">
-      
-      {/* 表头 */}
       <div class="grid grid-cols-3 bg-slate-900 text-white font-bold p-6">
         <div class="col-span-1 text-slate-400 uppercase tracking-wider text-sm">Feature</div>
         <div class="col-span-1 text-center text-blue-400 uppercase tracking-wider text-sm">Our Series</div>
         <div class="col-span-1 text-center text-slate-500 uppercase tracking-wider text-sm">Industry Standard</div>
       </div>
-
-      {/* 对比行 */}
       <div class="divide-y divide-slate-100">
         {items && items.map((item: any) => (
           <div class="grid grid-cols-3 p-6 items-center hover:bg-slate-50 transition-colors">
-            
-            <div class="col-span-1 font-extrabold text-slate-900 tracking-tight">
-              {item.feature || "Displacement"}
-            </div>
-            
-            <div class="col-span-1 text-center font-black text-blue-600 text-lg bg-blue-50 py-2 mx-4 rounded-lg border border-blue-100">
-              {item.our_value || "Up to 1000cc"}
-            </div>
-            
-            <div class="col-span-1 text-center font-medium text-slate-400">
-              {item.competitor_value || "Limited"}
-            </div>
-            
+            <div class="col-span-1 font-extrabold text-slate-900 tracking-tight">{item.label}</div>
+            <div class="col-span-1 text-center font-black text-blue-600 text-lg bg-blue-50 py-2 mx-4 rounded-lg border border-blue-100">{item.our_product}</div>
+            <div class="col-span-1 text-center font-medium text-slate-400">{item.competitor}</div>
           </div>
         ))}
       </div>
-      
     </div>
-    
   </div>
 </section>

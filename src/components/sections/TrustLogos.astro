@@ -1,25 +1,15 @@
 ---
-const { title, items } = Astro.props;
+const { title, logos } = Astro.props;
 ---
 <section class="py-16 border-y border-slate-200 bg-white overflow-hidden">
   <div class="max-w-7xl mx-auto px-6 text-center">
-    
-    <p class="text-sm font-bold tracking-widest text-slate-400 uppercase mb-10">
-      {title || "Trusted by Industry Leaders Worldwide"}
-    </p>
-
-    {/* Logo 弹性网格 */}
+    <p class="text-sm font-bold tracking-widest text-slate-400 uppercase mb-10">{title}</p>
     <div class="flex flex-wrap justify-center items-center gap-12 md:gap-20 opacity-70 hover:opacity-100 transition-opacity duration-500">
-      {items && items.map((item: any) => (
-        <div class="flex items-center justify-center w-32 h-16 grayscale hover:grayscale-0 hover:scale-105 transition-all duration-300">
-          <img 
-            src={item.image_url} 
-            alt="Client Logo" 
-            class="max-w-full max-h-full object-contain"
-          />
+      {logos && logos.map((logo: any) => (
+        <div class="flex items-center justify-center w-32 h-16 grayscale hover:grayscale-0 hover:scale-105 transition-all duration-300" title={logo.name}>
+          <img src={logo.image_url} alt={logo.name || "Client Logo"} class="max-w-full max-h-full object-contain" />
         </div>
       ))}
     </div>
-    
   </div>
 </section>
