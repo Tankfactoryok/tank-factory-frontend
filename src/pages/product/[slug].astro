@@ -1,19 +1,19 @@
 ---
 // 1. 导入全局样式
-import '../styles/global.css';
+import '../../styles/global.css';
 import Layout from '../../layouts/Layout.astro';
 
 // 2. 导入所有可能的“积木”组件（根据关键词动态按需调用）
-import Hero from '../components/sections/Hero.astro';
-import Features from '../components/sections/Features.astro';
-import Specifications from '../components/sections/Specifications.astro';
-import Comparison from '../components/sections/Comparison.astro';
-import FAQ from '../components/sections/FAQ.astro';
-import CaseStudies from '../components/sections/CaseStudies.astro';
-import CTABottom from '../components/sections/CTABottom.astro';
-import Process from '../components/sections/Process.astro';
-import Testimonials from '../components/sections/Testimonials.astro';
-import TrustLogos from '../components/sections/TrustLogos.astro';
+import Hero from '../../components/sections/Hero.astro';
+import Features from '../../components/sections/Features.astro';
+import Specifications from '../../components/sections/Specifications.astro';
+import Comparison from '../../components/sections/Comparison.astro';
+import FAQ from '../../components/sections/FAQ.astro';
+import CaseStudies from '../../components/sections/CaseStudies.astro';
+import CTABottom from '../../components/sections/CTABottom.astro';
+import Process from '../../components/sections/Process.astro';
+import Testimonials from '../../components/sections/Testimonials.astro';
+import TrustLogos from '../../components/sections/TrustLogos.astro';
 
 // 3. 建立 Strapi 组件名与 Astro 组件的映射字典
 const componentMap: Record<string, any> = {
